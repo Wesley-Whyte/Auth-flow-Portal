@@ -23,6 +23,24 @@ public class HomeController : Controller
         return View();
     }
 
+    /// <summary>Renders the user profile page with stubbed profile data.</summary>
+    /// <returns>The Profile view populated with a <see cref="Models.UserProfileViewModel"/>.</returns>
+    public IActionResult Profile()
+    {
+        // Stub data — replace with identity/database lookup once auth is wired up.
+        var model = new Models.UserProfileViewModel
+        {
+            FullName = "Wesley Ofori",
+            Username = "wesof",
+            Email = "wesoflife@gmail.com",
+            Bio = "Software developer building authflow.Portal. Passionate about clean auth flows and great UX.",
+            Role = "Admin",
+            JoinedDate = new DateTime(2025, 1, 15),
+        };
+
+        return View(model);
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

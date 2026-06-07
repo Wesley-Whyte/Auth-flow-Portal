@@ -1,0 +1,80 @@
+@model authflow.Portal.Models.UserProfileViewModel
+@{
+    ViewData["Title"] = "Profile";
+    var roleColor = Model.Role == "Admin" ? "danger" : "primary";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-8 col-xl-7">
+
+        @* Avatar + name card *@
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-4 flex-wrap">
+
+                    @* Initials avatar *@
+                    <div class="profile-avatar rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                         aria-hidden="true">
+                        <span class="profile-avatar__initials">@Model.Initials</span>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                            <h2 class="h4 mb-0 fw-semibold">@Model.FullName</h2>
+                            <span class="badge text-@roleColor">@Model.Role</span>
+                        </div>
+                        <p class="text-muted mb-0">&#64;@Model.Username</p>
+                    </div>
+
+                    <a href="#" class="btn btn-outline-secondary btn-sm align-self-start">
+                        Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @* About *@
+        <div class="card shadow-sm mb-4">
+            <div class="card-header fw-semibold">About</div>
+            <div class="card-body p-4">
+                @if (!string.IsNullOrWhiteSpace(Model.Bio))
+                {
+                    <p class="mb-0">@Model.Bio</p>
+                }
+                else
+                {
+                    <p class="text-muted fst-italic mb-0">No bio added yet.</p>
+                }
+            </div>
+        </div>
+
+        @* Account details *@
+        <div class="card shadow-sm">
+            <div class="card-header fw-semibold">Account Details</div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
+                        <span class="text-muted">Email</span>
+                        <span>@Model.Email</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
+                        <span class="text-muted">Username</span>
+                        <span>&#64;@Model.Username</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
+                        <span class="text-muted">Role</span>
+                        <span class="badge text-bg-@roleColor">@Model.Role</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
+                        <span class="text-muted">Member since</span>
+                        <span>@Model.JoinedDate.ToString("MMMM d, yyyy")</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+}
