@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using authflowPortal.Models;
+using authflow.Portal.Models;
 
-namespace authflowPortal.Controllers;
+namespace authflow.Portal.Controllers;
 
 public class HomeController : Controller
 {

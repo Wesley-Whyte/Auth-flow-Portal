@@ -1,4 +1,4 @@
-namespace authflowPortal.Models;
+namespace authflow.Portal.Models;
 
 public class ErrorViewModel
 {
