@@ -2,7 +2,178 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4">AuthFlow Portal</h1>
+        <p class="lead">Explore authentication flows in modern web applications</p>
+    </div>
+
+    <!-- Authentication Status Banner -->
+    @if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <div class="alert alert-success">
+            <strong>✓ Authenticated</strong> as <strong>@User.Identity?.Name</strong>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <strong>Not authenticated.</strong> <a href="/Account/Login">Sign in</a> to access exclusive content.
+        </div>
+    }
+
+    <div class="row">
+        <!-- ===== PUBLIC FEATURES (Everyone) ===== -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <strong>📚 Public: Concepts</strong>
+                </div>
+                <div class="card-body">
+                    <p>Understand the fundamental authentication concepts:</p>
+                    <ul>
+                        <li>OAuth 2.0 Overview</li>
+                        <li>OpenID Connect Basics</li>
+                        <li>JWT Tokens</li>
+                        <li>Session Management</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <strong>📖 Public: Documentation</strong>
+                </div>
+                <div class="card-body">
+                    <p>Read through our learning guides:</p>
+                    <a href="https://learn.microsoft.com/aspnet/core" class="btn btn-sm btn-primary">ASP.NET Core
+                        Docs</a>
+                        <a href="#" class="btn btn-sm btn-primary">Auth Best Practices</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== AUTHENTICATED FEATURES ===== -->
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <strong>👤 User: My Profile</strong>
+                        </div>
+                        <div class="card-body">
+                            <p>View and manage your account information:</p>
+                            <ul>
+                                <li>Profile Settings</li>
+                                <li>Change Password</li>
+                                <li>Active Sessions</li>
+                                <li>Security Settings</li>
+                            </ul>
+                            <a href="/Home/Profile" class="btn btn-sm btn-success">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <strong>🔐 User: Token Info</strong>
+                        </div>
+                        <div class="card-body">
+                            <p>View your authentication token claims:</p>
+                            <ul>
+                                <li>Token Claims</li>
+                                <li>Expiration Time</li>
+                                <li>Assigned Roles</li>
+                                <li>Permissions</li>
+                            </ul>
+                            <a href="#" class="btn btn-sm btn-success">View Token</a>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- ===== ADMIN FEATURES ===== -->
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <strong>⚙️ Admin: User Management</strong>
+                        </div>
+                        <div class="card-body">
+                            <p>Manage system users and roles:</p>
+                            <ul>
+                                <li>List All Users</li>
+                                <li>Assign Roles</li>
+                                <li>Disable Accounts</li>
+                                <li>View Audit Logs</li>
+                            </ul>
+                            <a href="#" class="btn btn-sm btn-danger">Admin Panel</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <strong>⚙️ Admin: System Logs</strong>
+                        </div>
+                        <div class="card-body">
+                            <p>Monitor system activity and security:</p>
+                            <ul>
+                                <li>Authentication Logs</li>
+                                <li>Failed Login Attempts</li>
+                                <li>Token Validations</li>
+                                <li>Error Logs</li>
+                            </ul>
+                            <a href="#" class="btn btn-sm btn-danger">View Logs</a>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- ===== DEVELOPER FEATURES ===== -->
+            @if (User.IsInRole("Developer") || User.IsInRole("Admin"))
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <strong>👨‍💻 Developer: API Testing</strong>
+                        </div>
+                        <div class="card-body">
+                            <p>Test authentication endpoints:</p>
+                            <ul>
+                                <li>Test Login Flow</li>
+                                <li>Token Validation</li>
+                                <li>Claims Inspection</li>
+                                <li>API Debugging</li>
+                            </ul>
+                            <a href="#" class="btn btn-sm btn-warning">API Tester</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <strong>👨‍💻 Developer: Flow Visualizer</strong>
+                        </div>
+                        <div class="card-body">
+                            <p>Visualize authentication flows in real-time:</p>
+                            <ul>
+                                <li>Interactive Flow Diagrams</li>
+                                <li>Request/Response Inspector</li>
+                                <li>Token Debugger</li>
+                                <li>Performance Metrics</li>
+                            </ul>
+                            <a href="#" class="btn btn-sm btn-warning">Flow Visualizer</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>

@@ -10,4 +10,9 @@
     <ProjectReference Include="..\authflow.Infrastructure\authflow.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="10.0.8" />
+  </ItemGroup>
+
 </Project>
