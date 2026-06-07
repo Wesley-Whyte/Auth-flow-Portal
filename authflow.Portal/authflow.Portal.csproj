@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\authflow.Infrastructure\authflow.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\authflow.Application\authflow.Application.csproj" />
+  </ItemGroup>
+
 </Project>
