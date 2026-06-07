@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using authflow.Portal.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace authflow.Portal.Controllers;
 
@@ -25,6 +26,7 @@ public class HomeController : Controller
 
     /// <summary>Renders the user profile page with stubbed profile data.</summary>
     /// <returns>The Profile view populated with a <see cref="Models.UserProfileViewModel"/>.</returns>
+    [Authorize]
     public IActionResult Profile()
     {
         // Stub data — replace with identity/database lookup once auth is wired up.

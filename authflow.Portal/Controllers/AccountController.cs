@@ -7,12 +7,15 @@ namespace authflow.Portal.Controllers;
 public class AccountController : Controller
 {
     private readonly ILogger<AccountController> _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    /// <summary>Initializes a new instance of <see cref="AccountController"/>.</summary>
+    /// <summary>Initialises a new instance of <see cref="AccountController"/>.</summary>
     /// <param name="logger">The logger instance for this controller.</param>
-    public AccountController(ILogger<AccountController> logger)
+    /// <param name="httpClientFactory">Factory used to create the auth API HTTP client.</param>
+    public AccountController(ILogger<AccountController> logger, IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
+        _httpClientFactory = httpClientFactory;
     }
 
     /// <summary>Renders the login form.</summary>
@@ -23,21 +26,67 @@ public class AccountController : Controller
         return View(new LoginViewModel());
     }
 
-    /// <summary>Processes the submitted login form.</summary>
+    /// <summary>Submits credentials to the authentication API and, on success, stores the
+    /// returned JWT in an HttpOnly cookie before redirecting the user.</summary>
     /// <param name="model">The credentials submitted by the user.</param>
+    /// <param name="returnUrl">The URL to redirect to after a successful login.</param>
     /// <returns>
-    /// Redirects to the home page on success; re-renders the login view with errors on failure.
+    /// Redirects to <paramref name="returnUrl"/> (or the home page) on success;
+    /// re-renders the login view with a model error on failure.
     /// </returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Login(LoginViewModel model)
+    public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
         if (!ModelState.IsValid)
             return View(model);
 
-        // TODO: replace with real credential validation (ASP.NET Core Identity, OAuth, etc.)
-        _logger.LogInformation("Login attempt for {Email}", model.Email);
+        var client = _httpClientFactory.CreateClient("AuthApi");
+        var payload = new { Username = model.Email, Password = model.Password };
+        var response = await client.PostAsJsonAsync("account/login", payload);
 
-        return RedirectToAction("Index", "Home");
+        if (!response.IsSuccessStatusCode)
+        {
+            ModelState.AddModelError(string.Empty, "Invalid email or password.");
+            return View(model);
+        }
+
+        var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        if (result?.Token is null)
+        {
+            ModelState.AddModelError(string.Empty, "Authentication failed. Please try again.");
+            return View(model);
+        }
+
+        // HttpOnly prevents JavaScript access; Secure ensures the cookie is only sent over HTTPS.
+        Response.Cookies.Append("jwt", result.Token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddHours(1)
+        });
+
+        _logger.LogInformation("Login successful for {Email}", model.Email);
+        return LocalRedirect(returnUrl ?? Url.Action("Index", "Home")!);
+    }
+
+    /// <summary>Clears the authentication cookie and redirects to the login page.</summary>
+    /// <returns>A redirect to the Login action.</returns>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("jwt");
+        return RedirectToAction("Login");
+    }
+
+    /// <summary>Represents the JSON response body returned by the authentication API.</summary>
+    /// <param name="Token">The JWT issued by the authentication API.</param>
+    private sealed record AuthResponse
+    {
+        public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
     }
 }
