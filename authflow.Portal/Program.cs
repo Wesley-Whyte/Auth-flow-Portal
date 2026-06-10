@@ -1,3 +1,4 @@
+using authflow.Infrastructure;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -5,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -14,8 +16,8 @@ builder.Services.AddAuthentication(options =>
 })
 .AddCookie(options =>
 {
-    options.LoginPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.LoginPath = "/Auth/Login";
+    options.AccessDeniedPath = "/Auth/AccessDenied";
 })
 .AddJwtBearer(options =>
 {
@@ -41,11 +43,6 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         }
     };
-});
-
-builder.Services.AddHttpClient("AuthApi", client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["AuthApi:BaseUrl"] ?? throw new InvalidOperationException("AuthApi:BaseUrl is not configured"));
 });
 
 builder.Services.AddAuthorization(options =>
