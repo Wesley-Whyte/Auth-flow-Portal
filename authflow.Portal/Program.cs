@@ -45,9 +45,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddHttpClient("AuthApi", client =>
 {
-    client.BaseAddress = new Uri(
-        builder.Configuration["AuthApi:BaseUrl"]
-        ?? throw new InvalidOperationException("AuthApi:BaseUrl is not configured"));
+    client.BaseAddress = new Uri(builder.Configuration["AuthApi:BaseUrl"] ?? throw new InvalidOperationException("AuthApi:BaseUrl is not configured"));
 });
 
 builder.Services.AddAuthorization(options =>

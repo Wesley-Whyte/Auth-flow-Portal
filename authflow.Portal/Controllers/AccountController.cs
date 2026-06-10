@@ -42,12 +42,12 @@ public class AccountController : Controller
             return View(model);
 
         var client = _httpClientFactory.CreateClient("AuthApi");
-        var payload = new { Username = model.Email, Password = model.Password };
+        var payload = new { username = model.UsernameOrEmail, model.Password };
         var response = await client.PostAsJsonAsync("account/login", payload);
 
         if (!response.IsSuccessStatusCode)
         {
-            ModelState.AddModelError(string.Empty, "Invalid email or password.");
+            ModelState.AddModelError(string.Empty, "Invalid username or password.");
             return View(model);
         }
 
@@ -67,7 +67,7 @@ public class AccountController : Controller
             Expires = DateTimeOffset.UtcNow.AddHours(1)
         });
 
-        _logger.LogInformation("Login successful for {Email}", model.Email);
+        _logger.LogInformation("Login successful for {UsernameOrEmail}", model.UsernameOrEmail);
         return LocalRedirect(returnUrl ?? Url.Action("Index", "Home")!);
     }
 
