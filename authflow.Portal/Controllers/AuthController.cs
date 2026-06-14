@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 using authflow.Portal.Models;
 using authflow.Application.Interfaces;
 
@@ -64,6 +67,54 @@ public class AuthController : Controller
             ModelState.AddModelError(string.Empty, "An error occurred during login. Please try again.");
             return View(model);
         }
+    }
+
+    /// <summary>Initiates an external OAuth challenge for the specified provider.</summary>
+    /// <param name="provider">The authentication provider name (e.g. "Google", "Microsoft").</param>
+    /// <param name="returnUrl">The URL to redirect to after a successful login.</param>
+    /// <returns>A challenge result that redirects the browser to the provider's consent screen.</returns>
+    [HttpGet]
+    public IActionResult ExternalLogin(string provider, string? returnUrl = null)
+    {
+        var redirectUrl = Url.Action("ExternalLoginCallback", "Auth", new { returnUrl });
+        var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+        return Challenge(properties, provider);
+    }
+
+    /// <summary>Handles the OAuth callback, signs the user in via the Cookie scheme, and redirects.</summary>
+    /// <param name="returnUrl">The URL to redirect to after a successful login.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>
+    /// Redirects to <paramref name="returnUrl"/> (or the home page) on success;
+    /// redirects to the login page if the external authentication failed.
+    /// </returns>
+    [HttpGet]
+    public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null)
+    {
+        var result = await HttpContext.AuthenticateAsync("ExternalCookie");
+        if (!result.Succeeded)
+            return RedirectToAction("Login");
+
+        var email = result.Principal!.FindFirstValue(ClaimTypes.Email) ?? "";
+        var name = result.Principal.FindFirstValue(ClaimTypes.Name) ?? email;
+        var provider = result.Properties?.Items[".AuthScheme"] ?? "External";
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, email),
+            new(ClaimTypes.Name, name),
+            new(ClaimTypes.Email, email),
+            new("provider", provider)
+        };
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+        await HttpContext.SignOutAsync("ExternalCookie");
+
+        _logger.LogInformation("External login successful via {Provider} for {Email}", provider, email);
+        return LocalRedirect(returnUrl ?? Url.Action("Index", "Home")!);
     }
 
     /// <summary>Clears the authentication cookie and redirects to the login page.</summary>

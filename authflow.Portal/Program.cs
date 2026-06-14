@@ -10,14 +10,28 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = "SmartAuth";
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultSignOutScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
+.AddPolicyScheme("SmartAuth", "JWT or Cookie", options =>
+{
+    // Route to JWT Bearer when the app's JWT cookie is present; otherwise use the Cookie scheme
+    // so that external-provider (Google/Microsoft) users authenticated via cookie are recognised.
+    options.ForwardDefaultSelector = ctx =>
+        ctx.Request.Cookies.ContainsKey("jwt")
+            ? JwtBearerDefaults.AuthenticationScheme
+            : CookieAuthenticationDefaults.AuthenticationScheme;
 })
 .AddCookie(options =>
 {
     options.LoginPath = "/Auth/Login";
     options.AccessDeniedPath = "/Auth/AccessDenied";
+})
+.AddCookie("ExternalCookie", options =>
+{
+    options.Cookie.Name = "external-auth";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
 })
 .AddJwtBearer(options =>
 {
@@ -43,6 +57,18 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         }
     };
+})
+.AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+    options.SignInScheme = "ExternalCookie";
+})
+.AddMicrosoftAccount(options =>
+{
+    options.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]!;
+    options.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"]!;
+    options.SignInScheme = "ExternalCookie";
 });
 
 builder.Services.AddAuthorization(options =>
