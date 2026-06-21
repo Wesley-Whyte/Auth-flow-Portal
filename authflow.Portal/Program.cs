@@ -2,7 +2,8 @@ using authflow.Infrastructure;
 using DotNetEnv;
 using Microsoft.Identity.Web;
 
-Env.Load();
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+    Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
