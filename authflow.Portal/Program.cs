@@ -1,8 +1,5 @@
 using authflow.Infrastructure;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,48 +8,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddAuthentication(options =>
 {
-    // SmartAuth routes to JwtBearer when the custom-API jwt cookie is present,
-    // otherwise falls through to EntraCookie so both sign-in paths populate User.
-    options.DefaultAuthenticateScheme = "SmartAuth";
-    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultSignOutScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-})
-.AddPolicyScheme("SmartAuth", "SmartAuth", opts =>
-{
-    opts.ForwardDefaultSelector = ctx =>
-        ctx.Request.Cookies.ContainsKey("jwt")
-            ? JwtBearerDefaults.AuthenticationScheme
-            : "EntraCookie";
-})
-.AddCookie(options =>
-{
-    options.LoginPath = "/Auth/Login";
-    options.AccessDeniedPath = "/Auth/AccessDenied";
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:Audience"],
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(
-                builder.Configuration["JWT:SigninKey"]
-                ?? throw new InvalidOperationException("JWT:SigninKey is not configured")))
-    };
-    // Read the JWT from the HttpOnly cookie so browser-based requests are authenticated
-    // without requiring an Authorization header.
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = ctx =>
-        {
-            ctx.Token = ctx.Request.Cookies["jwt"];
-            return Task.CompletedTask;
-        }
-    };
+    options.DefaultScheme = "EntraCookie";
+    options.DefaultChallengeScheme = "EntraOidc";
+    options.DefaultSignOutScheme = "EntraCookie";
 })
 .AddMicrosoftIdentityWebApp(
     builder.Configuration.GetSection("EntraExternalId"),
