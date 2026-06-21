@@ -1,6 +1,7 @@
 using authflow.Infrastructure;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,9 +11,18 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    // SmartAuth routes to JwtBearer when the custom-API jwt cookie is present,
+    // otherwise falls through to EntraCookie so both sign-in paths populate User.
+    options.DefaultAuthenticateScheme = "SmartAuth";
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultSignOutScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
+.AddPolicyScheme("SmartAuth", "SmartAuth", opts =>
+{
+    opts.ForwardDefaultSelector = ctx =>
+        ctx.Request.Cookies.ContainsKey("jwt")
+            ? JwtBearerDefaults.AuthenticationScheme
+            : "EntraCookie";
 })
 .AddCookie(options =>
 {
@@ -43,7 +53,11 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         }
     };
-});
+})
+.AddMicrosoftIdentityWebApp(
+    builder.Configuration.GetSection("EntraExternalId"),
+    openIdConnectScheme: "EntraOidc",
+    cookieScheme: "EntraCookie");
 
 builder.Services.AddAuthorization(options =>
 {

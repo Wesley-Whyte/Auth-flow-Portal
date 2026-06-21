@@ -30,9 +30,32 @@
                         </li>
                     </ul>
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Login">Login</a>
-                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link text-dark fw-semibold">@User.Identity.Name</span>
+                            </li>
+                            <li class="nav-item">
+                                @* Route sign-out to the appropriate handler based on which IdP authenticated the user. *@
+                                @if (User.FindFirst("iss")?.Value?.Contains("ciamlogin.com") == true)
+                                {
+                                    <a class="nav-link text-dark" asp-controller="EntraAuth" asp-action="EntraSignOut">Sign out</a>
+                                }
+                                else
+                                {
+                                    <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-link nav-link text-dark p-0">Sign out</button>
+                                    </form>
+                                }
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Login">Sign in</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

@@ -53,6 +53,18 @@
 
                 </form>
 
+                <div class="d-flex align-items-center my-4 gap-2">
+                    <hr class="flex-grow-1 m-0" />
+                    <span class="text-muted small">or</span>
+                    <hr class="flex-grow-1 m-0" />
+                </div>
+
+                <a asp-controller="EntraAuth" asp-action="SignIn"
+                   asp-route-returnUrl="@Context.Request.Query["ReturnUrl"]"
+                   class="btn btn-outline-secondary w-100">
+                    Sign in with Microsoft
+                </a>
+
             </div>
         </div>
 
