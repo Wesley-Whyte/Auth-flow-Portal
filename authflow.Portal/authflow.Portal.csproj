@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="DotNetEnv" Version="3.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="8.0.0" />
     <PackageReference Include="Microsoft.Identity.Web" Version="3.8.2" />
   </ItemGroup>

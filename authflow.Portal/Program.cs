@@ -1,6 +1,8 @@
 using authflow.Infrastructure;
+using DotNetEnv;
 using Microsoft.Identity.Web;
 
+Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
