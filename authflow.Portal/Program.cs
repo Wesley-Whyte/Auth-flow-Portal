@@ -43,8 +43,7 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuer = true,
         ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:Audience"],
+        ValidateAudience = false, // Audience validation is not needed when the JWT is only used for authentication (not authorization)
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
             System.Text.Encoding.UTF8.GetBytes(
@@ -58,6 +57,12 @@ builder.Services.AddAuthentication(options =>
         OnMessageReceived = ctx =>
         {
             ctx.Token = ctx.Request.Cookies["jwt"];
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = ctx =>
+        {
+            var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogWarning("JWT authentication failed: {Error}", ctx.Exception.Message);
             return Task.CompletedTask;
         }
     };
