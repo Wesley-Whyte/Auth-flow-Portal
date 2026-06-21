@@ -1,7 +1,11 @@
 using authflow.Infrastructure;
+using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+    Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
