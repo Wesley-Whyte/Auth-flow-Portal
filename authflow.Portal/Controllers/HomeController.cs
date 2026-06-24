@@ -8,15 +8,32 @@ namespace authflow.Portal.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly IConfiguration _configuration;
 
-    public HomeController(ILogger<HomeController> logger)
+    /// <summary>Initialises the controller with logging and configuration dependencies.</summary>
+    /// <param name="logger">Logger for this controller.</param>
+    /// <param name="configuration">Application configuration, populated from environment variables and appsettings.</param>
+    public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
     {
         _logger = logger;
+        _configuration = configuration;
     }
 
+    /// <summary>Renders the home page with current environment configuration values.</summary>
+    /// <returns>The Index view populated with an <see cref="EnvironmentConfigViewModel"/>.</returns>
     public IActionResult Index()
     {
-        return View();
+        var model = new EnvironmentConfigViewModel(
+            Environment:           System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
+            AuthApiBaseUrl:        _configuration["AuthApi:BaseUrl"]                           ?? "(not set)",
+            JwtIssuer:             _configuration["JWT:Issuer"]                                ?? "(not set)",
+            JwtSigninKey:          _configuration["JWT:SigninKey"]                             ?? "(not set)",
+            GoogleClientId:        _configuration["Authentication:Google:ClientId"]            ?? "(not set)",
+            GoogleClientSecret:    _configuration["Authentication:Google:ClientSecret"]        ?? "(not set)",
+            MicrosoftClientId:     _configuration["Authentication:Microsoft:ClientId"]         ?? "(not set)",
+            MicrosoftClientSecret: _configuration["Authentication:Microsoft:ClientSecret"]     ?? "(not set)"
+        );
+        return View(model);
     }
 
     public IActionResult Privacy()
